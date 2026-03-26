@@ -62,6 +62,8 @@
 
   .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
 
+  html { scroll-behavior: smooth; }
+
   .section {
     margin: 48px auto;
     max-width: 960px;
@@ -1254,7 +1256,7 @@
     link.addEventListener('click', e => {
       e.preventDefault();
       const target = document.querySelector(link.getAttribute('href'));
-      if (target) target.scrollIntoView({ behavior: 'instant', block: 'start' });
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
 </script>
