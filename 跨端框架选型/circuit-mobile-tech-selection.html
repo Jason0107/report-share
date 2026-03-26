@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Circuit Mobile — Technology Selection Proposal</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-light: #dbeafe;
+    --accent: #f59e0b;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #1e293b;
+    --text-secondary: #64748b;
+    --border: #e2e8f0;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --purple: #8b5cf6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #7c3aed 100%);
+    color: white;
+    padding: 80px 40px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-content { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 6px 20px;
+    border-radius: 100px;
+    font-size: 14px;
+    letter-spacing: 1px;
+    margin-bottom: 24px;
+  }
+  .hero h1 { font-size: 42px; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.5px; }
+  .hero p { font-size: 18px; opacity: 0.85; max-width: 600px; margin: 0 auto; }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+  .section {
+    margin: 48px auto;
+    max-width: 960px;
+    padding: 0 24px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .section-number {
+    width: 40px; height: 40px;
+    background: var(--primary);
+    color: white;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .section-title { font-size: 26px; font-weight: 700; color: var(--text); }
+
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 32px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02);
+    transition: box-shadow 0.2s;
+  }
+  .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .card p { color: var(--text-secondary); font-size: 15px; margin-bottom: 12px; }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .info-card {
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  .info-card .icon { font-size: 32px; margin-bottom: 8px; }
+  .info-card .label { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; }
+  .info-card .value { font-size: 16px; font-weight: 600; color: var(--text); }
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    font-size: 14px;
+  }
+  thead th {
+    background: #f1f5f9;
+    padding: 14px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  thead th:first-child { padding-left: 20px; }
+  tbody td {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+  tbody td:first-child { padding-left: 20px; font-weight: 500; color: var(--text); }
+  tbody tr:hover { background: #f8fafc; }
+
+  .stars { color: var(--accent); letter-spacing: 1px; white-space: nowrap; }
+  .stars-dim { color: #e2e8f0; }
+
+  .approach-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .approach-card {
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid var(--border);
+    text-align: center;
+    position: relative;
+  }
+  .approach-card.recommended {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    box-shadow: 0 0 0 1px var(--primary);
+  }
+  .approach-card .rec-badge {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary);
+    color: white;
+    padding: 2px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .approach-card h4 { font-size: 16px; margin-bottom: 8px; margin-top: 4px; }
+  .approach-card p { font-size: 13px; color: var(--text-secondary); margin: 0; }
+
+  .ranking {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 24px 0 8px;
+    flex-wrap: wrap;
+  }
+  .rank-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg);
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .rank-item.top { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+  .rank-arrow { color: var(--text-secondary); font-size: 18px; }
+
+  .highlight-box {
+    background: linear-gradient(135deg, #eff6ff 0%, #f0f0ff 100%);
+    border-left: 4px solid var(--primary);
+    border-radius: 0 12px 12px 0;
+    padding: 24px 28px;
+    margin: 24px 0;
+  }
+  .highlight-box h4 { color: var(--primary); margin-bottom: 8px; font-size: 16px; }
+  .highlight-box p { color: var(--text-secondary); margin: 0; font-size: 14px; }
+  .highlight-box ul { color: var(--text-secondary); font-size: 14px; margin: 8px 0 0 18px; }
+  .highlight-box li { margin-bottom: 4px; }
+
+  .conclusion-card {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 60%, #7c3aed 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .conclusion-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M20 20h20v20H20zM0 0h20v20H0z'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  .conclusion-card > * { position: relative; z-index: 1; }
+  .conclusion-card h3 { font-size: 24px; margin-bottom: 16px; }
+  .conclusion-card .arch {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 14px 32px;
+    border-radius: 14px;
+    font-size: 20px;
+    font-weight: 700;
+    margin: 16px 0;
+  }
+  .conclusion-card .desc {
+    font-size: 15px;
+    opacity: 0.85;
+    max-width: 580px;
+    margin: 16px auto 0;
+    line-height: 1.8;
+  }
+
+  .arch-diagram {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: 20px;
+    margin: 32px 0 12px;
+    flex-wrap: wrap;
+  }
+  .arch-block {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 14px;
+    padding: 20px 28px;
+    text-align: center;
+    min-width: 200px;
+    flex: 1;
+  }
+  .arch-block h5 { font-size: 15px; margin-bottom: 6px; opacity: 0.9; }
+  .arch-block p { font-size: 13px; opacity: 0.7; margin: 0; }
+  .arch-connector {
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    opacity: 0.5;
+  }
+
+  .native-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .native-card {
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+  .native-card .lang { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .native-card .platform { font-size: 13px; color: var(--text-secondary); }
+
+  .pros-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .pros-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg);
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    border: 1px solid var(--border);
+  }
+  .pros-item .check { color: var(--success); font-size: 18px; }
+
+  footer {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+  }
+
+  @media (max-width: 640px) {
+    .hero { padding: 48px 20px 40px; }
+    .hero h1 { font-size: 28px; }
+    .approach-cards { grid-template-columns: 1fr; }
+    .native-grid { grid-template-columns: 1fr; }
+    .arch-diagram { flex-direction: column; align-items: center; }
+    .arch-connector { transform: rotate(90deg); }
+    .section { padding: 0 16px; }
+    .card { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">TECHNOLOGY SELECTION</div>
+    <h1>Circuit Mobile Tech Selection</h1>
+    <p>Technology evaluation and recommendation for the AI Q&amp;A platform (RAG + Multimodal) mobile initiative</p>
+  </div>
+</div>
+
+<!-- Section 1: Background -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <h2 class="section-title">Background</h2>
+  </div>
+  <div class="card">
+    <p>Circuit is an AI Q&amp;A platform (RAG + Multimodal). It already has a production <strong style="color:var(--text)">Web App</strong> and now needs to support both <strong style="color:var(--text)">iOS and Android</strong> mobile platforms.</p>
+    <div class="info-grid" style="margin-top:20px">
+      <div class="info-card">
+        <div class="icon">🌐</div>
+        <div class="label">Web App</div>
+        <div class="value">Runs in Browser</div>
+      </div>
+      <div class="info-card">
+        <div class="icon">🔀</div>
+        <div class="label">Cross-Platform</div>
+        <div class="value">One Codebase → Both OS</div>
+      </div>
+      <div class="info-card">
+        <div class="icon">📱</div>
+        <div class="label">Native</div>
+        <div class="value">Separate iOS / Android</div>
+      </div>
+    </div>
+    <div class="highlight-box">
+      <h4>Key Decision</h4>
+      <p>Given that a Web App already exists, the core question for mobile is: <strong>Cross-Platform vs. Native Development</strong>.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Section 2: Overall Comparison -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <h2 class="section-title">Overall Comparison of Three Approaches</h2>
+  </div>
+  <div class="card">
+    <div class="approach-cards">
+      <div class="approach-card">
+        <h4>🌐 Web App</h4>
+        <p>Fastest to ship, but lowest ceiling for performance and UX</p>
+      </div>
+      <div class="approach-card recommended">
+        <div class="rec-badge">✦ Recommended</div>
+        <h4>🔀 Cross-Platform</h4>
+        <p>Near-native performance with manageable cost and efficiency</p>
+      </div>
+      <div class="approach-card">
+        <h4>📱 Native</h4>
+        <p>Best performance, but highest cost</p>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Dimension</th>
+          <th>Web App</th>
+          <th>Cross-Platform</th>
+          <th>Native</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Performance</td>
+          <td><span class="stars">★★</span><span class="stars-dim">★★★</span></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+          <td><span class="stars">★★★★★</span></td>
+        </tr>
+        <tr>
+          <td>Dev Efficiency</td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+          <td><span class="stars">★★</span><span class="stars-dim">★★★</span></td>
+        </tr>
+        <tr>
+          <td>Overall Cost</td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+          <td><span class="stars">★★</span><span class="stars-dim">★★★</span></td>
+        </tr>
+        <tr>
+          <td>Hiring</td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+          <td><span class="stars">★★</span><span class="stars-dim">★★★</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="highlight-box" style="margin-top:24px">
+      <h4>Takeaway</h4>
+      <p>For an <strong>AI Q&amp;A application</strong>, cross-platform performance is more than sufficient, while offering clear advantages in development efficiency, cost, and talent availability.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Section 3: Cross-platform Comparison -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <h2 class="section-title">Cross-Platform Options Compared</h2>
+  </div>
+  <div class="card">
+    <p style="margin-bottom:20px">Leading cross-platform solutions today: <strong style="color:var(--text)">React Native / Flutter / Ionic / Kotlin Multiplatform</strong></p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Option</th>
+          <th>Performance</th>
+          <th>Ecosystem</th>
+          <th>Hiring</th>
+          <th>Maintainability</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>React Native</strong></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+        </tr>
+        <tr>
+          <td>Flutter</td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+          <td><span class="stars">★★★</span><span class="stars-dim">★★</span></td>
+          <td><span class="stars">★★★</span><span class="stars-dim">★★</span></td>
+        </tr>
+        <tr>
+          <td>Ionic</td>
+          <td><span class="stars">★★</span><span class="stars-dim">★★★</span></td>
+          <td><span class="stars">★★★</span><span class="stars-dim">★★</span></td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★★</span></td>
+        </tr>
+        <tr>
+          <td>Kotlin Multiplatform</td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+          <td><span class="stars">★★</span><span class="stars-dim">★★★</span></td>
+          <td><span class="stars">★★</span><span class="stars-dim">★★★</span></td>
+          <td><span class="stars">★★</span><span class="stars-dim">★★★</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="highlight-box" style="margin-top:24px">
+      <h4>Quick Assessment</h4>
+      <ul>
+        <li><strong>React Native</strong> — Most balanced overall; front-end team friendly; largest talent pool</li>
+        <li><strong>Flutter</strong> — Strong raw performance, but requires adopting the Dart ecosystem</li>
+        <li><strong>Ionic</strong> — Essentially WebView-based; lower UX ceiling</li>
+        <li><strong>Kotlin Multiplatform</strong> — Better suited for teams with strong native engineering capability</li>
+      </ul>
+    </div>
+
+    <div style="margin-top:16px">
+      <p style="text-align:center;font-weight:600;color:var(--text);margin-bottom:12px;font-size:15px">Overall Ranking</p>
+      <div class="ranking">
+        <div class="rank-item top">🥇 React Native</div>
+        <div class="rank-arrow">›</div>
+        <div class="rank-item">🥈 Flutter</div>
+        <div class="rank-arrow">›</div>
+        <div class="rank-item">🥉 Ionic</div>
+        <div class="rank-arrow">›</div>
+        <div class="rank-item">④ KMP</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 4: Native Options -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <h2 class="section-title">Native Options Reference</h2>
+  </div>
+  <div class="card">
+    <div class="native-grid">
+      <div class="native-card">
+        <div style="font-size:36px;margin-bottom:8px">🍎</div>
+        <div class="lang">Swift</div>
+        <div class="platform">iOS Platform</div>
+      </div>
+      <div class="native-card">
+        <div style="font-size:36px;margin-bottom:8px">🤖</div>
+        <div class="lang">Kotlin</div>
+        <div class="platform">Android Platform</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Language</th>
+          <th>Performance</th>
+          <th>Ecosystem</th>
+          <th>Hiring</th>
+          <th>Maintainability</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Swift (iOS)</td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+        </tr>
+        <tr>
+          <td>Kotlin (Android)</td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pros-list" style="margin-top:20px">
+      <div class="pros-item"><span class="check">✓</span> Full access to system capabilities</div>
+      <div class="pros-item"><span class="check">✓</span> UI/UX fully aligned with platform standards</div>
+      <div class="pros-item"><span class="check">✓</span> Highest performance ceiling</div>
+      <div class="pros-item" style="border-color:var(--danger);color:var(--danger)"><span>✗</span> Significantly higher development cost and staffing</div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 5: Recommendation -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <h2 class="section-title">Recommendation</h2>
+  </div>
+
+  <div class="conclusion-card">
+    <h3>Cross-Platform First, Native as Fallback</h3>
+    <div class="arch">
+      <span>React Native</span>
+      <span style="opacity:0.5">+</span>
+      <span>Swift / Kotlin</span>
+    </div>
+
+    <div class="arch-diagram">
+      <div class="arch-block">
+        <h5>React Native</h5>
+        <p>Handles core business flows<br>AI chat, document viewer, search, etc.</p>
+      </div>
+      <div class="arch-connector">+</div>
+      <div class="arch-block">
+        <h5>Swift / Kotlin</h5>
+        <p>Handles platform-level capabilities<br>Push notifications, camera, biometrics, etc.</p>
+      </div>
+    </div>
+
+    <p class="desc">
+      React Native covers the primary business logic, ensuring development efficiency and access to a large talent pool.<br>
+      Native code handles low-level platform capabilities and performance-critical modules, maximizing user experience.
+    </p>
+  </div>
+
+  <div class="card" style="margin-top:24px">
+    <h3 style="font-size:18px;margin-bottom:16px">Key Reasons for This Recommendation</h3>
+    <div class="pros-list">
+      <div class="pros-item"><span class="check">✓</span> Cross-platform covers most business screens with higher efficiency</div>
+      <div class="pros-item"><span class="check">✓</span> Native fallback for system-level and performance-critical features</div>
+      <div class="pros-item"><span class="check">✓</span> React ecosystem — front-end teams can ramp up quickly</div>
+      <div class="pros-item"><span class="check">✓</span> Largest talent pool; easiest to hire for</div>
+      <div class="pros-item"><span class="check">✓</span> Performance fully sufficient for AI Q&amp;A use cases</div>
+      <div class="pros-item"><span class="check">✓</span> Mature community with rich third-party library support</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Circuit Mobile Technology Selection Proposal &middot; 2026</p>
+</footer>
+
+</body>
+</html>
