@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Circuit Mobile — 技术选型方案（详细版）</title>
+<style>
+  :root {
+    --primary: #3b82f6;
+    --primary-dark: #1d4ed8;
+    --primary-light: #eff6ff;
+    --accent: #f59e0b;
+    --accent-dim: #d4d4d8;
+    --bg: #f9fafb;
+    --card: #ffffff;
+    --text: #111827;
+    --text-mid: #374151;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --border: #e5e7eb;
+    --border-light: #f3f4f6;
+    --success: #059669;
+    --success-light: #ecfdf5;
+    --warning: #d97706;
+    --warning-light: #fffbeb;
+    --danger: #dc2626;
+    --danger-light: #fef2f2;
+    --purple: #7c3aed;
+    --radius: 14px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 24px rgba(0,0,0,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ===== Hero ===== */
+  .hero {
+    background: linear-gradient(160deg, #0f172a 0%, #1e3a8a 40%, #3b82f6 75%, #6366f1 100%);
+    color: white;
+    padding: 96px 40px 72px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 20% 80%, rgba(99,102,241,0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(59,130,246,0.2) 0%, transparent 50%);
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-content { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 6px 22px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .hero h1 {
+    font-size: 44px;
+    font-weight: 800;
+    margin-bottom: 18px;
+    letter-spacing: -1px;
+    line-height: 1.2;
+  }
+  .hero p {
+    font-size: 17px;
+    color: rgba(255,255,255,0.88);
+    max-width: 560px;
+    margin: 0 auto;
+    line-height: 1.7;
+    font-weight: 400;
+  }
+
+  /* ===== Layout ===== */
+  .section {
+    margin: 56px auto;
+    max-width: 920px;
+    padding: 0 24px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .section-number {
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(59,130,246,0.3);
+  }
+  .section-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+
+  /* ===== Card ===== */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 36px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .card p {
+    color: var(--text-mid);
+    font-size: 15px;
+    margin-bottom: 14px;
+    line-height: 1.8;
+  }
+  .card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    color: var(--text);
+    letter-spacing: -0.2px;
+  }
+
+  /* ===== Info Grid ===== */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .info-card {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    padding: 22px 16px;
+    text-align: center;
+    border: 1px solid var(--border);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .info-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .info-card .icon { font-size: 28px; margin-bottom: 10px; }
+  .info-card .label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+  .info-card .value { font-size: 15px; font-weight: 700; color: var(--text); }
+
+  /* ===== Table ===== */
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    font-size: 14px;
+  }
+  thead th {
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    padding: 14px 18px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border);
+  }
+  thead th:first-child { padding-left: 22px; }
+  tbody td {
+    padding: 14px 18px;
+    border-top: 1px solid var(--border-light);
+    color: var(--text-mid);
+    font-size: 14px;
+  }
+  tbody td:first-child { padding-left: 22px; font-weight: 600; color: var(--text); }
+  tbody tr:nth-child(even) { background: #fafbfc; }
+  tbody tr:hover { background: var(--primary-light); }
+  tbody tr { transition: background 0.15s; }
+
+  .stars { color: var(--accent); letter-spacing: 2px; white-space: nowrap; font-size: 15px; }
+  .stars-dim { color: var(--accent-dim); letter-spacing: 2px; font-size: 15px; }
+
+  /* ===== Approach Cards ===== */
+  .approach-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .approach-card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 28px 20px;
+    border: 1px solid var(--border);
+    text-align: center;
+    position: relative;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .approach-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .approach-card.recommended {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    box-shadow: 0 0 0 1px var(--primary), var(--shadow);
+  }
+  .approach-card .rec-badge {
+    position: absolute;
+    top: -11px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 3px 16px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(59,130,246,0.3);
+  }
+  .approach-card h4 { font-size: 16px; font-weight: 700; margin-bottom: 8px; margin-top: 4px; color: var(--text); }
+  .approach-card p { font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.6; }
+
+  /* ===== Ranking ===== */
+  .ranking {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0 8px;
+    flex-wrap: wrap;
+  }
+  .rank-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card);
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text-mid);
+    box-shadow: var(--shadow-sm);
+  }
+  .rank-item.top {
+    background: linear-gradient(135deg, var(--primary-light) 0%, #dbeafe 100%);
+    border-color: var(--primary);
+    color: var(--primary-dark);
+    box-shadow: 0 2px 8px rgba(59,130,246,0.15);
+  }
+  .rank-arrow { color: var(--text-muted); font-size: 20px; font-weight: 300; }
+
+  /* ===== Callout Boxes ===== */
+  .highlight-box {
+    background: var(--primary-light);
+    border-left: 4px solid var(--primary);
+    border-radius: 0 12px 12px 0;
+    padding: 22px 28px;
+    margin: 24px 0;
+  }
+  .highlight-box h4 { color: var(--primary-dark); margin-bottom: 8px; font-size: 15px; font-weight: 700; }
+  .highlight-box p { color: var(--text-mid); margin: 0; font-size: 14px; line-height: 1.8; }
+  .highlight-box ul { color: var(--text-mid); font-size: 14px; margin: 10px 0 0 20px; }
+  .highlight-box li { margin-bottom: 8px; line-height: 1.75; }
+  .highlight-box strong { color: var(--text); }
+
+  .warning-box {
+    background: var(--warning-light);
+    border-left: 4px solid var(--warning);
+    border-radius: 0 12px 12px 0;
+    padding: 22px 28px;
+    margin: 24px 0;
+  }
+  .warning-box h4 { color: #92400e; margin-bottom: 8px; font-size: 15px; font-weight: 700; }
+  .warning-box p { color: #78350f; margin: 0; font-size: 14px; line-height: 1.8; }
+
+  .danger-box {
+    background: var(--danger-light);
+    border-left: 4px solid var(--danger);
+    border-radius: 0 12px 12px 0;
+    padding: 22px 28px;
+    margin: 24px 0;
+  }
+  .danger-box h4 { color: #991b1b; margin-bottom: 8px; font-size: 15px; font-weight: 700; }
+  .danger-box p { color: #7f1d1d; margin: 0; font-size: 14px; line-height: 1.8; }
+
+  .success-box {
+    background: var(--success-light);
+    border-left: 4px solid var(--success);
+    border-radius: 0 12px 12px 0;
+    padding: 22px 28px;
+    margin: 24px 0;
+  }
+  .success-box h4 { color: #065f46; margin-bottom: 8px; font-size: 15px; font-weight: 700; }
+  .success-box p { color: #064e3b; margin: 0; font-size: 14px; line-height: 1.8; }
+  .success-box ul { color: #064e3b; font-size: 14px; margin: 10px 0 0 20px; }
+  .success-box li { margin-bottom: 8px; line-height: 1.75; }
+  .success-box strong { color: #022c22; }
+
+  /* ===== Conclusion Card ===== */
+  .conclusion-card {
+    background: linear-gradient(160deg, #0f172a 0%, #1e3a8a 40%, #3b82f6 80%, #6366f1 100%);
+    color: white;
+    border-radius: var(--radius);
+    padding: 48px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .conclusion-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 70%, rgba(99,102,241,0.25) 0%, transparent 50%),
+                radial-gradient(circle at 70% 30%, rgba(59,130,246,0.2) 0%, transparent 50%);
+  }
+  .conclusion-card > * { position: relative; z-index: 1; }
+  .conclusion-card h3 { font-size: 22px; font-weight: 800; margin-bottom: 20px; letter-spacing: -0.3px; color: #fff; }
+  .conclusion-card .arch {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.18);
+    padding: 16px 36px;
+    border-radius: 14px;
+    font-size: 18px;
+    font-weight: 800;
+    margin: 16px 0;
+    letter-spacing: -0.2px;
+  }
+  .conclusion-card .desc {
+    font-size: 15px;
+    color: rgba(255,255,255,0.92);
+    max-width: 560px;
+    margin: 20px auto 0;
+    line-height: 1.9;
+    font-weight: 400;
+  }
+
+  .arch-diagram {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: 16px;
+    margin: 32px 0 16px;
+    flex-wrap: wrap;
+  }
+  .arch-block {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 14px;
+    padding: 24px 28px;
+    text-align: center;
+    min-width: 200px;
+    flex: 1;
+    backdrop-filter: blur(8px);
+  }
+  .arch-block h5 { font-size: 15px; font-weight: 700; margin-bottom: 8px; color: rgba(255,255,255,0.97); }
+  .arch-block p { font-size: 13px; color: rgba(255,255,255,0.78); margin: 0; line-height: 1.7; }
+  .arch-connector { display: flex; align-items: center; font-size: 24px; opacity: 0.4; font-weight: 300; }
+
+  /* ===== Native Grid ===== */
+  .native-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .native-card {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    padding: 28px;
+    border: 1px solid var(--border);
+    text-align: center;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .native-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .native-card .lang { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+  .native-card .platform { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+
+  /* ===== Pros List ===== */
+  .pros-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .pros-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--card);
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--text-mid);
+    border: 1px solid var(--border);
+    line-height: 1.6;
+    transition: background 0.15s;
+    box-shadow: var(--shadow-sm);
+  }
+  .pros-item:hover { background: #f8fafb; }
+  .pros-item .check { color: var(--success); font-size: 16px; flex-shrink: 0; margin-top: 2px; font-weight: 700; }
+  .pros-item strong { color: var(--text); }
+
+  /* ===== Detail Grid ===== */
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 20px 0;
+  }
+  .detail-card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .detail-card:hover { box-shadow: var(--shadow); }
+  .detail-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 3px;
+  }
+  .detail-card:nth-child(1)::before { background: var(--success); }
+  .detail-card:nth-child(2)::before { background: var(--primary); }
+  .detail-card:nth-child(3)::before { background: var(--warning); }
+  .detail-card:nth-child(4)::before { background: var(--danger); }
+  .detail-card h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .detail-card p {
+    font-size: 13.5px;
+    color: var(--text-mid);
+    margin: 0;
+    line-height: 1.75;
+  }
+  .detail-card .tag {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 12px;
+    letter-spacing: 0.2px;
+  }
+  .tag-best { background: #dcfce7; color: #166534; }
+  .tag-good { background: #dbeafe; color: #1e40af; }
+  .tag-ok { background: #fef3c7; color: #92400e; }
+  .tag-low { background: #fef2f2; color: #991b1b; }
+
+  /* ===== Native Scope ===== */
+  .native-scope-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+    margin: 16px 0;
+  }
+  .native-scope-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--card);
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    color: var(--text-mid);
+    font-weight: 500;
+    box-shadow: var(--shadow-sm);
+    transition: background 0.15s;
+  }
+  .native-scope-item:hover { background: #f8fafb; }
+  .native-scope-item .scope-icon { font-size: 18px; flex-shrink: 0; }
+
+  /* ===== Compare Summary ===== */
+  .compare-summary {
+    font-size: 14px;
+    color: var(--text-mid);
+    line-height: 1.85;
+    margin: 16px 0 0;
+  }
+  .compare-summary p { margin-bottom: 6px; }
+  .compare-summary strong { color: var(--text); font-weight: 700; }
+
+  /* ===== Footer ===== */
+  footer {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--text-muted);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+    margin-top: 72px;
+    font-weight: 500;
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 640px) {
+    .hero { padding: 56px 20px 44px; }
+    .hero h1 { font-size: 28px; }
+    .approach-cards { grid-template-columns: 1fr; }
+    .native-grid { grid-template-columns: 1fr; }
+    .detail-grid { grid-template-columns: 1fr; }
+    .info-grid { grid-template-columns: 1fr; }
+    .arch-diagram { flex-direction: column; align-items: center; }
+    .arch-connector { transform: rotate(90deg); }
+    .section { padding: 0 16px; }
+    .card { padding: 24px; }
+    .conclusion-card { padding: 32px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">技术选型报告</div>
+    <h1>Circuit 移动端技术选型</h1>
+    <p>基于现有 Web 能力，评估移动端解决方案的可行性与性价比，为 AI 问答平台（RAG + 多模态）选择合适的实施路径</p>
+  </div>
+</div>
+
+<!-- ===================== 第1部分：项目背景 ===================== -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <h2 class="section-title">项目背景</h2>
+  </div>
+  <div class="card">
+    <p>Circuit 是一个 AI 问答平台，核心能力包括 <strong>RAG（检索增强生成）</strong>和<strong>多模态交互</strong>（文本、图片、文档等）。目前已有生产环境的 <strong>Web 应用</strong>，现需进一步支持 <strong>iOS 和 Android</strong> 移动端平台。</p>
+    <p>本次评估的核心是：在已有 Web 能力的基础上，评估移动端方案的可行性与性价比，选择适合 Circuit 的实施路径。</p>
+
+    <div class="info-grid" style="margin-top:24px">
+      <div class="info-card">
+        <div class="icon">🌐</div>
+        <div class="label">Web 应用</div>
+        <div class="value">运行在浏览器中</div>
+      </div>
+      <div class="info-card">
+        <div class="icon">🔀</div>
+        <div class="label">跨平台</div>
+        <div class="value">一套代码 → 双端运行</div>
+      </div>
+      <div class="info-card">
+        <div class="icon">📱</div>
+        <div class="label">原生开发</div>
+        <div class="value">分别开发 iOS / Android</div>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <h4>核心决策</h4>
+      <p>鉴于 Web 应用已经存在，移动端的核心问题是：<strong>跨平台 vs. 原生开发</strong>，以及如何在性能、成本、效率之间取得最佳平衡。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 第2部分：三种技术路线概述 ===================== -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <h2 class="section-title">移动端技术路线概述</h2>
+  </div>
+  <div class="card">
+    <p>移动端技术路线大体可分为三类：<strong>Web 应用、跨平台、原生开发</strong>。</p>
+
+    <div class="approach-cards" style="margin-top:20px">
+      <div class="approach-card">
+        <h4>🌐 Web 应用</h4>
+        <p>基于 HTML / CSS / JS 构建，同一套代码适配桌面和移动端，用户通过浏览器访问</p>
+      </div>
+      <div class="approach-card recommended">
+        <div class="rec-badge">✦ 推荐方案</div>
+        <h4>🔀 跨平台</h4>
+        <p>编写一套主代码同时覆盖 iOS 和 Android，通过框架映射到平台原生能力</p>
+      </div>
+      <div class="approach-card">
+        <h4>📱 原生开发</h4>
+        <p>针对各平台分别开发，代码直接运行在原生操作系统环境中</p>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <h4>各方案要点</h4>
+      <ul>
+        <li><strong>Web 应用</strong> — 直接使用前端 Web 技术构建，同一套代码适配桌面端和移动端，用户通过浏览器访问，代码在浏览器中运行。</li>
+        <li><strong>跨平台</strong> — 编写一套主体代码同时覆盖 iOS 和 Android。不直接运行在浏览器中，而是通过跨平台框架将业务逻辑和 UI 映射到移动端平台能力上。常见方案包括 React Native、Flutter、Kotlin Multiplatform 和 Ionic。</li>
+        <li><strong>原生开发</strong> — 针对各平台分别开发。iOS 主要使用 Swift / Objective-C，Android 主要使用 Kotlin / Java。代码直接运行在原生操作系统环境中，UI 组件、系统能力和性能调度都与平台本身直接集成。</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 第3部分：三种方案总体对比 ===================== -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <h2 class="section-title">三种方案总体对比</h2>
+  </div>
+  <div class="card">
+    <p>由于 Circuit 已有 Web 应用，Web 方案已提供了基线能力。因此本次评估<strong>重点比较跨平台与原生</strong>，Web 应用作为参照。</p>
+
+    <table style="margin-top:20px">
+      <thead>
+        <tr>
+          <th>评估维度</th>
+          <th>Web 应用</th>
+          <th>跨平台</th>
+          <th>原生开发</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>性能表现</td>
+          <td><span class="stars">★★</span><span class="stars-dim">★★★</span></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+          <td><span class="stars">★★★★★</span></td>
+        </tr>
+        <tr>
+          <td>开发效率</td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+          <td><span class="stars">★★</span><span class="stars-dim">★★★</span></td>
+        </tr>
+        <tr>
+          <td>综合成本</td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+          <td><span class="stars">★★</span><span class="stars-dim">★★★</span></td>
+        </tr>
+        <tr>
+          <td>人才招聘</td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+          <td><span class="stars">★★</span><span class="stars-dim">★★★</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="compare-summary" style="margin-top:22px">
+      <p><strong>Web 应用</strong>在开发速度、低成本和复用已有 Web 能力方面优势明显，但在性能和系统级能力方面上限最低。</p>
+      <p><strong>原生开发</strong>性能最强、用户体验最佳、系统集成最深，但开发成本最高，通常需要分别维护 iOS 和 Android 两套实现。</p>
+      <p><strong>跨平台</strong>处于两者之间，在性能、效率和成本之间取得了较好的平衡。</p>
+    </div>
+
+    <div class="highlight-box" style="margin-top:24px">
+      <h4>核心结论</h4>
+      <p>结合 Circuit 的业务特点（AI 问答、多模态上传 / 回放等场景），产品对图形性能没有极高要求，大多数场景下<strong>跨平台方案已足够支撑核心业务需求</strong>。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 第4部分：跨平台方案详细对比 ===================== -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <h2 class="section-title">跨平台方案详细对比</h2>
+  </div>
+  <div class="card">
+    <p>当前主流跨平台方案包括 <strong>React Native、Flutter、Ionic 和 Kotlin Multiplatform</strong>。</p>
+
+    <div class="warning-box">
+      <h4>当前现状</h4>
+      <p>Circuit 目前的移动端方案基于 <strong>Ionic</strong>，即通过一个 App 外壳嵌入 WebView，在内部加载 Web 应用。本质上仍是 Web 应用运行在 WebView 中，性能和原生体验上限较低。</p>
+    </div>
+
+    <table style="margin-top:20px">
+      <thead>
+        <tr>
+          <th>方案</th>
+          <th>性能表现</th>
+          <th>生态系统</th>
+          <th>人才招聘</th>
+          <th>可维护性</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>React Native</strong></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+        </tr>
+        <tr>
+          <td>Flutter</td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+          <td><span class="stars">★★★</span><span class="stars-dim">★★</span></td>
+          <td><span class="stars">★★★</span><span class="stars-dim">★★</span></td>
+        </tr>
+        <tr>
+          <td>Ionic</td>
+          <td><span class="stars">★★</span><span class="stars-dim">★★★</span></td>
+          <td><span class="stars">★★★</span><span class="stars-dim">★★</span></td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★★</span></td>
+        </tr>
+        <tr>
+          <td>Kotlin Multiplatform</td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+          <td><span class="stars">★★</span><span class="stars-dim">★★★</span></td>
+          <td><span class="stars">★★</span><span class="stars-dim">★★★</span></td>
+          <td><span class="stars">★★</span><span class="stars-dim">★★★</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin-top:28px">各方案详细分析</h3>
+
+    <div class="detail-grid">
+      <div class="detail-card">
+        <h4>⚛️ React Native</h4>
+        <p>综合最均衡的方案。在性能、生态、招聘和长期可维护性方面都表现良好，对前端团队最友好，迁移成本相对最低。Web 前端开发者可快速上手，社区活跃且第三方库丰富。</p>
+        <div class="tag tag-best">综合最优</div>
+      </div>
+      <div class="detail-card">
+        <h4>🦋 Flutter</h4>
+        <p>性能强劲、UI 一致性高，但需要引入 Dart 语言和完整的 Flutter 技术栈。团队学习曲线和招聘门槛都高于 React Native。更适合愿意重建技术栈、追求更强 UI 控制力的团队。</p>
+        <div class="tag tag-good">性能最强</div>
+      </div>
+      <div class="detail-card">
+        <h4>⚡ Ionic</h4>
+        <p>如果目标是在当前 WebView 包壳方案上继续迭代、最大程度复用已有 Web 资产，Ionic 是最省力的选择。但本质上仍是 WebView 中运行的 Web 应用，性能和原生体验的上限最低。</p>
+        <div class="tag tag-ok">成本最低 / 上限最低</div>
+      </div>
+      <div class="detail-card">
+        <h4>🟣 Kotlin Multiplatform</h4>
+        <p>更适合原生团队希望共享业务逻辑的场景，不是典型的前端跨平台 UI 方案。在当前团队结构下，采纳门槛较高，短期性价比不突出。</p>
+        <div class="tag tag-low">不推荐作为主选</div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px">
+      <p style="text-align:center;font-weight:700;color:var(--text);margin-bottom:14px;font-size:15px">综合排名</p>
+      <div class="ranking">
+        <div class="rank-item top">🥇 React Native</div>
+        <div class="rank-arrow">›</div>
+        <div class="rank-item">🥈 Flutter</div>
+        <div class="rank-arrow">›</div>
+        <div class="rank-item">🥉 Ionic</div>
+        <div class="rank-arrow">›</div>
+        <div class="rank-item">④ KMP</div>
+      </div>
+    </div>
+
+    <div class="highlight-box" style="margin-top:24px">
+      <h4>小结</h4>
+      <p>综合 Circuit 当前团队能力、已有 Web 基础和未来双端支持成本，<strong>React Native 是现阶段最均衡的跨平台方案</strong>。Flutter 更适合愿意重建技术栈的团队；Ionic 更适合继续走低成本短期策略；Kotlin Multiplatform 暂不推荐作为主选。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 第5部分：原生开发补充说明 ===================== -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <h2 class="section-title">原生开发补充说明</h2>
+  </div>
+  <div class="card">
+    <p>如果选择原生路线，iOS 主要使用 <strong>Swift</strong>，Android 主要使用 <strong>Kotlin</strong>。在实际落地中，如果资源有限，团队通常优先建设 iOS 端，再评估 Android 投入节奏。</p>
+
+    <div class="native-grid" style="margin-top:24px">
+      <div class="native-card">
+        <div style="font-size:36px;margin-bottom:10px">🍎</div>
+        <div class="lang">Swift</div>
+        <div class="platform">iOS 平台</div>
+      </div>
+      <div class="native-card">
+        <div style="font-size:36px;margin-bottom:10px">🤖</div>
+        <div class="lang">Kotlin</div>
+        <div class="platform">Android 平台</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>语言</th>
+          <th>性能表现</th>
+          <th>生态系统</th>
+          <th>人才招聘</th>
+          <th>可维护性</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Swift (iOS)</td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+        </tr>
+        <tr>
+          <td>Kotlin (Android)</td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★</span><span class="stars-dim">★</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="highlight-box" style="margin-top:22px">
+      <h4>Swift 的独特优势</h4>
+      <p>虽然跨平台框架可以接近 iOS 风格，但在默认组件体系、交互细节和整体平台一致性上仍存在差异。Swift 更容易实现完全原生的 iOS 体验。</p>
+    </div>
+
+    <h3 style="margin-top:24px">原生更适合承载的能力范围</h3>
+    <p>以下系统级、性能敏感的能力，由原生代码处理通常效果更好：</p>
+    <div class="native-scope-list" style="margin-top:14px">
+      <div class="native-scope-item"><span class="scope-icon">📦</span> App 外壳（Shell）</div>
+      <div class="native-scope-item"><span class="scope-icon">🔐</span> 登录与应用启动流程</div>
+      <div class="native-scope-item"><span class="scope-icon">🔔</span> 推送通知</div>
+      <div class="native-scope-item"><span class="scope-icon">🎙️</span> 录音与音频播放</div>
+      <div class="native-scope-item"><span class="scope-icon">📸</span> 图片 / 视频选取与上传</div>
+      <div class="native-scope-item"><span class="scope-icon">🛡️</span> 权限管理</div>
+      <div class="native-scope-item"><span class="scope-icon">📊</span> 性能监控与崩溃处理</div>
+      <div class="native-scope-item"><span class="scope-icon">📋</span> 系统分享、剪贴板、文件处理</div>
+    </div>
+
+    <div class="pros-list" style="margin-top:22px">
+      <div class="pros-item"><span class="check">✓</span> 完全访问系统级能力</div>
+      <div class="pros-item"><span class="check">✓</span> UI/UX 完全符合平台设计规范</div>
+      <div class="pros-item"><span class="check">✓</span> 性能上限最高</div>
+      <div class="pros-item" style="border-color:var(--danger);color:var(--danger)"><span style="font-weight:700">✗</span> 开发成本和人力投入显著更高</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 第6部分：推荐方案 ===================== -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <h2 class="section-title">推荐方案</h2>
+  </div>
+
+  <div class="conclusion-card">
+    <h3>混合开发：跨平台为主，原生兜底</h3>
+    <div class="arch">
+      <span>React Native</span>
+      <span style="opacity:0.4;font-weight:300">+</span>
+      <span>Swift / Kotlin</span>
+    </div>
+
+    <div class="arch-diagram">
+      <div class="arch-block">
+        <h5>React Native</h5>
+        <p>承载核心业务流程<br>AI 对话、文档查看、搜索等<br>覆盖大部分业务页面和交互</p>
+      </div>
+      <div class="arch-connector">+</div>
+      <div class="arch-block">
+        <h5>Swift / Kotlin</h5>
+        <p>承载平台级能力<br>App Shell、推送、相机、生物认证<br>性能监控、崩溃处理等底层模块</p>
+      </div>
+    </div>
+
+    <p class="desc">
+      主要业务页面和交互用跨平台方案构建，App 外壳和关键系统级能力由原生处理。<br>
+      避免继续以纯 WebView 包壳作为长期方案。
+    </p>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <h3>为什么推荐这个方案？</h3>
+
+    <div class="success-box">
+      <h4>行业实践参考</h4>
+      <p>参考豆包、元宝等头部 AI 应用的普遍做法，行业主流方案并非纯 WebView 路线，而是：</p>
+      <ul>
+        <li><strong>保留原生客户端能力</strong> — App Shell、推送、权限等由原生处理</li>
+        <li><strong>原生兜底关键流程</strong> — 登录、启动、性能监控等核心链路走原生</li>
+        <li><strong>跨平台提升业务层迭代效率</strong> — 大部分业务页面用跨平台框架快速交付</li>
+      </ul>
+    </div>
+
+    <p style="color:var(--text-mid);font-size:14px;margin-bottom:4px;margin-top:4px">对于 Circuit 这样的产品，这种方案通常能提供更好的性价比：</p>
+
+    <div class="pros-list" style="margin-top:14px">
+      <div class="pros-item"><span class="check">✓</span> 比纯原生开发<strong>更快</strong>交付</div>
+      <div class="pros-item"><span class="check">✓</span> 比纯 WebView <strong>体验更好</strong></div>
+      <div class="pros-item"><span class="check">✓</span> 比两套原生 App <strong>成本更低</strong></div>
+      <div class="pros-item"><span class="check">✓</span> 比继续依赖 Ionic <strong>更具扩展性</strong></div>
+      <div class="pros-item"><span class="check">✓</span> React 生态 — 前端团队可<strong>快速上手</strong></div>
+      <div class="pros-item"><span class="check">✓</span> 人才池最大，招聘最便捷</div>
+      <div class="pros-item"><span class="check">✓</span> 性能完全满足 AI 问答场景需求</div>
+      <div class="pros-item"><span class="check">✓</span> 社区成熟，第三方库支持丰富</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>不推荐的路线</h3>
+    <div class="danger-box">
+      <h4>不建议继续以 Ionic / WebView 作为长期主路径</h4>
+      <p>Ionic 本质上是在原生 App 壳中运行 WebView，性能和交互体验上限较低。随着业务复杂度提升，纯 WebView 路线会越来越难以满足用户对流畅度和原生体验的期望。短期可以维持，但不适合作为长期主路径。</p>
+    </div>
+    <div class="warning-box" style="margin-bottom:0">
+      <h4>不建议重建两套完整的原生 App</h4>
+      <p>原生应作为<strong>补充</strong>（承载 Shell 和关键能力），而非将全部产品重建为两套独立原生应用。这样做成本过高、人力投入大，且对 AI 问答类产品而言收益不成正比。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 第7部分：最终结论 ===================== -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">7</div>
+    <h2 class="section-title">最终结论</h2>
+  </div>
+  <div class="card">
+    <p style="font-size:15px;line-height:1.9;color:var(--text)">
+      综合考虑业务场景、现有技术基础、开发效率、成本控制和长期扩展性，最适合 Circuit 的方案是：
+    </p>
+
+    <div class="conclusion-card" style="margin-top:24px">
+      <h3>以 React Native 为主、原生能力兜底的混合开发模式</h3>
+      <div class="arch">
+        <span>React Native（业务主体）</span>
+        <span style="opacity:0.4;font-weight:300">+</span>
+        <span>Native（Shell + 关键能力）</span>
+      </div>
+      <p class="desc">
+        这一方案在性能、用户体验、开发效率和团队可行性之间取得了良好的平衡，<br>
+        适合作为 Circuit 移动端开发的主路径。
+      </p>
+    </div>
+
+    <div class="success-box" style="margin-top:24px;margin-bottom:0">
+      <h4>一句话总结</h4>
+      <p style="font-size:15px"><strong>跨平台为主（React Native），原生兜底（Swift / Kotlin），不建议继续 WebView 包壳路线。</strong></p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Circuit 移动端技术选型方案（详细版） · 2026</p>
+</footer>
+
+</body>
+</html>
