@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>技术分享 & 选型报告</title>
+<style>
+  :root {
+    --bg: #0a0b10;
+    --surface: #13151e;
+    --surface-2: #1a1d2a;
+    --border: #262a3a;
+    --text: #e2e5f0;
+    --text-dim: #7d82a0;
+    --accent: #6c8aff;
+    --accent-glow: rgba(108,138,255,0.12);
+    --green: #4ade80;
+    --cyan: #22d3ee;
+    --purple: #a78bfa;
+    --orange: #fb923c;
+    --card-radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hero {
+    text-align: center;
+    padding: 100px 32px 72px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(108,138,255,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 50% at 20% 100%, rgba(167,139,250,0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 100%, rgba(34,211,238,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero h1 {
+    font-size: 2.8rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    position: relative;
+    background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero .subtitle {
+    font-size: 1.1rem;
+    color: var(--text-dim);
+    margin-top: 16px;
+    position: relative;
+  }
+
+  .grid {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    flex: 1;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 32px 28px 28px;
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+    transition: transform .25s cubic-bezier(.22,1,.36,1),
+                border-color .25s,
+                box-shadow .25s;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    box-shadow: 0 8px 32px rgba(108,138,255,0.08), 0 0 0 1px var(--accent);
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: var(--card-radius) var(--card-radius) 0 0;
+    opacity: 0;
+    transition: opacity .25s;
+  }
+  .card:hover::before { opacity: 1; }
+
+  .card:nth-child(1)::before { background: linear-gradient(90deg, var(--accent), var(--cyan)); }
+  .card:nth-child(2)::before { background: linear-gradient(90deg, var(--purple), var(--accent)); }
+  .card:nth-child(3)::before { background: linear-gradient(90deg, var(--green), var(--cyan)); }
+  .card:nth-child(4)::before { background: linear-gradient(90deg, var(--orange), var(--purple)); }
+
+  .card-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 4px 10px;
+    border-radius: 6px;
+    width: fit-content;
+  }
+  .badge-blue   { background: rgba(108,138,255,0.12); color: var(--accent); }
+  .badge-purple { background: rgba(167,139,250,0.12); color: var(--purple); }
+  .badge-green  { background: rgba(74,222,128,0.10); color: var(--green); }
+  .badge-orange { background: rgba(251,146,60,0.12); color: var(--orange); }
+
+  .card h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.35;
+  }
+  .card p {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    line-height: 1.65;
+    flex: 1;
+  }
+  .card-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--accent);
+    opacity: 0;
+    transform: translateX(-8px);
+    transition: opacity .25s, transform .25s;
+  }
+  .card:hover .card-arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .footer {
+    text-align: center;
+    padding: 32px 24px;
+    color: var(--text-dim);
+    font-size: 0.78rem;
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 640px) {
+    .hero { padding: 64px 20px 48px; }
+    .hero h1 { font-size: 1.9rem; }
+    .grid { grid-template-columns: 1fr; padding: 0 16px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>技术分享 & 选型报告</h1>
+  <p class="subtitle">项目实践沉淀 · 技术方案评估 · 面试腹稿</p>
+</div>
+
+<div class="grid">
+  <a class="card" href="./site-forge-全自动建站流水线/index.html">
+    <span class="card-badge badge-blue">AI 工程化</span>
+    <h2>Site Forge — 全自动建站部署流水线</h2>
+    <p>基于 AI Agent Skill 工作流，实现从脚手架生成、Vercel 自动部署到 GSC 接入的全链路自动化，零人工干预完成站群批量生产。</p>
+    <span class="card-arrow">阅读全文 →</span>
+  </a>
+
+  <a class="card" href="./superpowers/index.html">
+    <span class="card-badge badge-purple">AI 工程化</span>
+    <h2>Superpowers — AI 编程代理工程化方案</h2>
+    <p>从"写 Prompt"到"搭脚手架"，对比裸跑 Agent 与结构化方案，让 AI 编程代理在工程上真正可用。</p>
+    <span class="card-arrow">阅读全文 →</span>
+  </a>
+
+  <a class="card" href="./跨平台框架选型/index.html">
+    <span class="card-badge badge-green">技术选型</span>
+    <h2>桌面跨端框架选型 — Electron vs Tauri</h2>
+    <p>桌面端跨平台方案技术评估，从性能、包体积、生态、安全性等多维度对比 Electron 与 Tauri 的取舍。</p>
+    <span class="card-arrow">阅读全文 →</span>
+  </a>
+
+  <a class="card" href="./跨端框架选型/index.html">
+    <span class="card-badge badge-orange">技术选型</span>
+    <h2>Circuit 移动端技术选型</h2>
+    <p>基于现有 Web 能力，为 AI 问答平台（RAG + 多模态）评估移动端方案的可行性与性价比，选择合适的实施路径。</p>
+    <span class="card-arrow">阅读全文 →</span>
+  </a>
+</div>
+
+<div class="footer">技术分享与选型报告合集 · 持续更新</div>
+
+</body>
+</html>

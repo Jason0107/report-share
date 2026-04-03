@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Site Forge — 全自动建站部署流水线</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface-2: #232733;
+    --border: #2e3240;
+    --text: #e1e4ed;
+    --text-dim: #8b8fa7;
+    --accent: #6c8aff;
+    --accent-dim: #4a5f99;
+    --green: #4ade80;
+    --yellow: #facc15;
+    --red: #f87171;
+    --cyan: #22d3ee;
+    --orange: #fb923c;
+    --purple: #a78bfa;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 0;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #1a1040 0%, #0f1117 50%, #0a1628 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 80px 40px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(ellipse at 30% 50%, rgba(108,138,255,0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 50%, rgba(34,211,238,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero h1 {
+    font-size: 2.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero .subtitle {
+    font-size: 1.15rem;
+    color: var(--text-dim);
+    max-width: 700px;
+    margin: 0 auto 28px;
+    position: relative;
+  }
+  .hero .resume-line {
+    display: inline-block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 24px;
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    max-width: 760px;
+    text-align: left;
+    position: relative;
+  }
+  .hero .resume-line strong { color: var(--cyan); font-weight: 600; }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin: 48px auto;
+    max-width: 960px;
+  }
+  .toc h2 {
+    font-size: 1rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+  }
+  .toc ol {
+    list-style: none;
+    counter-reset: toc;
+    columns: 2;
+    column-gap: 40px;
+  }
+  .toc li {
+    counter-increment: toc;
+    padding: 4px 0;
+  }
+  .toc li::before {
+    content: counter(toc, decimal-leading-zero) '.';
+    color: var(--accent-dim);
+    font-weight: 600;
+    margin-right: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  .toc a {
+    color: var(--text);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color .2s;
+  }
+  .toc a:hover { border-color: var(--accent); }
+
+  section {
+    margin: 56px auto;
+    max-width: 960px;
+    padding: 0 32px;
+  }
+  section h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  section h2 .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px; height: 32px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  section h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 28px 0 12px;
+    color: var(--cyan);
+  }
+  section p {
+    margin: 12px 0;
+    color: var(--text);
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 22px;
+  }
+  .card .label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  .card .value {
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+  .card .note {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+
+  .pipeline {
+    position: relative;
+    padding-left: 40px;
+    margin: 24px 0;
+  }
+  .pipeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--green));
+  }
+  .stage {
+    position: relative;
+    margin-bottom: 20px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: border-color .2s;
+  }
+  .stage:hover { border-color: var(--accent-dim); }
+  .stage::before {
+    content: attr(data-num);
+    position: absolute;
+    left: -40px;
+    top: 16px;
+    width: 30px;
+    height: 30px;
+    background: var(--surface-2);
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .stage .stage-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+  }
+  .stage .stage-desc {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+  .stage .stage-output {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 0.78rem;
+    color: var(--green);
+    background: rgba(74,222,128,0.08);
+    padding: 2px 10px;
+    border-radius: 4px;
+  }
+
+  .code-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 0.82rem;
+    line-height: 1.65;
+    overflow-x: auto;
+    margin: 14px 0;
+    color: var(--text-dim);
+  }
+  .code-block .comment { color: #5c6370; }
+  .code-block .cmd { color: var(--green); }
+  .code-block .flag { color: var(--orange); }
+  .code-block .str { color: var(--yellow); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.88rem;
+  }
+  th {
+    text-align: left;
+    padding: 10px 14px;
+    background: var(--surface);
+    border-bottom: 2px solid var(--border);
+    color: var(--text-dim);
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(108,138,255,0.03); }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+  .tag-blue { background: rgba(108,138,255,0.15); color: var(--accent); }
+  .tag-green { background: rgba(74,222,128,0.12); color: var(--green); }
+  .tag-yellow { background: rgba(250,204,21,0.12); color: var(--yellow); }
+  .tag-red { background: rgba(248,113,113,0.12); color: var(--red); }
+  .tag-cyan { background: rgba(34,211,238,0.12); color: var(--cyan); }
+  .tag-purple { background: rgba(167,139,250,0.12); color: var(--purple); }
+
+  .arch-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    margin: 24px 0;
+    text-align: center;
+    font-family: 'SF Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.8;
+    color: var(--text-dim);
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .highlight-box {
+    background: rgba(108,138,255,0.06);
+    border-left: 3px solid var(--accent);
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+    font-size: 0.9rem;
+  }
+
+  .warn-box {
+    background: rgba(250,204,21,0.06);
+    border-left: 3px solid var(--yellow);
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+    font-size: 0.9rem;
+  }
+
+  .key-point {
+    background: rgba(74,222,128,0.06);
+    border-left: 3px solid var(--green);
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+    font-size: 0.9rem;
+  }
+
+  .interview-qa {
+    margin: 20px 0;
+  }
+  .interview-qa .q {
+    font-weight: 600;
+    color: var(--orange);
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+  }
+  .interview-qa .a {
+    padding-left: 16px;
+    border-left: 2px solid var(--border);
+    margin-bottom: 20px;
+    color: var(--text);
+    font-size: 0.9rem;
+  }
+
+  .metrics-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 16px 0;
+  }
+  .metric {
+    flex: 1;
+    min-width: 140px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .metric .num { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+  .metric .unit { font-size: 0.78rem; color: var(--text-dim); margin-top: 4px; }
+
+  .footer {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+  }
+
+  ul { padding-left: 20px; margin: 8px 0; }
+  li { margin: 4px 0; font-size: 0.9rem; }
+
+  .back-home {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 999;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 500;
+    backdrop-filter: blur(12px);
+    transition: color .2s, border-color .2s;
+  }
+  .back-home:hover { color: var(--accent); border-color: var(--accent); }
+
+  @media (max-width: 700px) {
+    .hero { padding: 48px 20px 36px; }
+    .hero h1 { font-size: 1.8rem; }
+    .toc ol { columns: 1; }
+    section { padding: 0 16px; }
+    .card-grid { grid-template-columns: 1fr; }
+    .metrics-bar { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<a class="back-home" href="../index.html">← 返回主页</a>
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<div class="hero">
+  <h1>Site Forge — <span>全自动建站部署流水线</span></h1>
+  <p class="subtitle">基于 AI Agent Skill 工作流，实现从想法到上线全链路零人工干预的站群批量生产系统</p>
+  <div class="resume-line">
+    <strong>简历原文：</strong>基于 AI Agent 封装 Skill 工作流，实现从脚手架生成、Git Push 触发 Vercel 自动部署（Vercel API + Git Integration）到 Google Search Console 接入的全链路自动化，零人工干预完成站点批量生产与数据监控。
+  </div>
+</div>
+
+<!-- ═══════════════════ TOC ═══════════════════ -->
+<div class="toc container">
+  <h2>目录</h2>
+  <ol>
+    <li><a href="#s1">项目定位与商业逻辑</a></li>
+    <li><a href="#s2">系统架构全景</a></li>
+    <li><a href="#s3">AI Agent Skill 工作流</a></li>
+    <li><a href="#s4">10 阶段无人值守流水线</a></li>
+    <li><a href="#s5">自动化脚本体系</a></li>
+    <li><a href="#s6">Monorepo 部署架构</a></li>
+    <li><a href="#s7">质量保障与自动验证</a></li>
+    <li><a href="#s8">数据驱动的 30 天评估</a></li>
+    <li><a href="#s9">踩过的坑 & 工程决策</a></li>
+    <li><a href="#s10">面试预设问答</a></li>
+  </ol>
+</div>
+
+<!-- ═══════════════════ S1 ═══════════════════ -->
+<section id="s1">
+  <h2><span class="num">01</span> 项目定位与商业逻辑</h2>
+
+  <p>站群矩阵 (Site Farm) 的本质是<strong>用数量对冲不确定性</strong>：快速生产大量细分领域的小站，用数据筛选流量赢家，再集中资源放大盈利。</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="label">核心策略</div>
+      <div class="value">速度优先 + 数据驱动</div>
+      <div class="note">每站从想法到上线 &lt; 1 天，30 天评估周期，无情砍掉无流量站点</div>
+    </div>
+    <div class="card">
+      <div class="label">变现路径</div>
+      <div class="value">AdSense → 联盟 → Mediavine</div>
+      <div class="note">按流量阶段升级：0-500 UV/天 → 500-2K → 2K-10K → 10K+</div>
+    </div>
+    <div class="card">
+      <div class="label">语言策略</div>
+      <div class="value">英文优先</div>
+      <div class="note">英文 CPC 高 5-10 倍、联盟生态成熟、Mediavine 仅支持英文</div>
+    </div>
+    <div class="card">
+      <div class="label">产能节奏</div>
+      <div class="value">每周 2-3 站，同时评估 6-8 站</div>
+      <div class="note">两周建站 + 两周观察，Day 30 判决去留</div>
+    </div>
+  </div>
+
+  <div class="highlight-box">
+    <strong>关键洞察：</strong>站群赚钱的关键不是建得多，而是<strong>快速找到赢家后集中资源</strong>。AI 自动化把单站成本压到 ~2 小时，让"试错"变得极其廉价。
+  </div>
+</section>
+
+<!-- ═══════════════════ S2 ═══════════════════ -->
+<section id="s2">
+  <h2><span class="num">02</span> 系统架构全景</h2>
+
+  <div class="arch-diagram">
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         <span style="color:var(--accent)">用户输入（一次性）</span>                            │
+│          领域 / 受众 / 域名 / 变现偏好 / 种子内容方向                   │
+└──────────────────────────────┬──────────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                     <span style="color:var(--cyan)">AI Agent（Cursor IDE）</span>                          │
+│  ┌─────────────┐  ┌─────────────┐  ┌──────────────┐  ┌──────────────┐ │
+│  │  SKILL.md   │  │ AGENTS.md   │  │ SITE-SPEC.md │  │ CHECKLIST.md │ │
+│  │  建站协议    │  │ 项目上下文   │  │ MVP 规格     │  │ 质量标准     │ │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬───────┘  └──────┬───────┘ │
+│         └────────────────┴────────────────┴──────────────────┘         │
+│                            10 阶段流水线                                │
+└──────────────────────────────┬──────────────────────────────────────────┘
+                               │
+               ┌───────────────┼───────────────┐
+               ▼               ▼               ▼
+    ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+    │ <span style="color:var(--green)">new-site.sh</span>  │ │ <span style="color:var(--green)">deploy.sh</span>   │ │<span style="color:var(--green)">check-site.sh</span>│
+    │ 脚手架生成    │ │ Vercel 部署   │ │ 健康检查      │
+    └──────┬───────┘ └──────┬───────┘ └──────┬───────┘
+           │                │                │
+           ▼                ▼                ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        <span style="color:var(--yellow)">Monorepo（site-forge）</span>                       │
+│  sites/aitoolpilot/  sites/calcwise/  sites/nocoderadar/  ...（7 站）  │
+└──────────────────────────────┬──────────────────────────────────────────┘
+                               │ git push
+                               ▼
+┌──────────────┐      ┌──────────────┐      ┌───────────────┐
+│   <span style="color:var(--purple)">GitHub</span>     │─────▶│   <span style="color:var(--accent)">Vercel</span>    │─────▶│ <span style="color:var(--cyan)">Live Sites</span>   │
+│  Monorepo    │      │ Auto Deploy  │      │ *.vercel.app  │
+└──────────────┘      └──────────────┘      └───────┬───────┘
+                                                    │
+                                        ┌───────────┼───────────┐
+                                        ▼           ▼           ▼
+                                  ┌──────────┐ ┌────────┐ ┌──────────┐
+                                  │   <span style="color:var(--green)">GSC</span>    │ │  <span style="color:var(--orange)">GA4</span>  │ │<span style="color:var(--yellow)">AdSense</span>  │
+                                  │ 索引监控  │ │ 流量   │ │ 广告变现  │
+                                  └──────────┘ └────────┘ └──────────┘
+  </div>
+</section>
+
+<!-- ═══════════════════ S3 ═══════════════════ -->
+<section id="s3">
+  <h2><span class="num">03</span> AI Agent Skill 工作流</h2>
+
+  <p>这是整个系统的核心设计：<strong>把建站流程编码为 Skill 文件</strong>，让 AI Agent 像执行 SOP 一样自主完成全部工作。</p>
+
+  <h3>什么是 Skill？</h3>
+  <p>Skill 是一份 Markdown 协议文件（<code>.cursor/skills/build-site/SKILL.md</code>），定义了 AI Agent 执行任务的完整规则：输入要求、执行步骤、约束条件、输出格式。当用户说"新建一个站"时，Agent 自动加载这份协议并按序执行。</p>
+
+  <h3>Skill 驱动的分层架构</h3>
+  <table>
+    <tr><th>层级</th><th>文件</th><th>职责</th></tr>
+    <tr>
+      <td><span class="tag tag-blue">全局上下文</span></td>
+      <td><code>AGENTS.md</code></td>
+      <td>项目定位、技术栈、目录结构、对话触发词 — 每次对话自动加载</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-green">执行协议</span></td>
+      <td><code>SKILL.md</code></td>
+      <td>10 阶段建站流水线的完整 SOP — 用户触发"建站"时按需加载</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-yellow">规格标准</span></td>
+      <td><code>SITE-SPEC.md</code></td>
+      <td>MVP 页面数/文章数/技术规格/设计标准 — 建站时参考</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-cyan">质量门禁</span></td>
+      <td><code>CHECKLIST.md</code></td>
+      <td>构建/SEO/性能/安全/合规/交互测试 共 40+ 项检查 — Review 阶段逐项执行</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-red">运营手册</span></td>
+      <td><code>PLAYBOOK.md</code></td>
+      <td>选品框架、变现阶梯、内容规范、止损规则 — 站点通过评估后参考</td>
+    </tr>
+  </table>
+
+  <div class="key-point">
+    <strong>为什么这样设计？</strong>将知识和流程"外化"到文件中，而不是依赖 AI 的隐性记忆。好处是：可版本控制、可迭代、可复用、可审计。每次建站的质量是确定性的，不受模型随机性影响。
+  </div>
+</section>
+
+<!-- ═══════════════════ S4 ═══════════════════ -->
+<section id="s4">
+  <h2><span class="num">04</span> 10 阶段无人值守流水线</h2>
+
+  <p>一次收料、全程自主、交付即上线。用户只需提供 5 项材料（领域/受众/域名/变现偏好/内容方向），AI 自主执行以下 10 个阶段：</p>
+
+  <div class="pipeline">
+    <div class="stage" data-num="01">
+      <div class="stage-title">规划 — 关键词研究 & 站点架构</div>
+      <div class="stage-desc">根据领域做长尾关键词分析、内容金字塔规划、选择最佳站点结构（博客/工具/目录/对比）</div>
+      <div class="stage-output">→ sites/&lt;站名&gt;/PLAN.md</div>
+    </div>
+    <div class="stage" data-num="02">
+      <div class="stage-title">搭建 — 脚手架生成 & 工程初始化</div>
+      <div class="stage-desc">执行 <code>new-site.sh</code> 从模板生成项目骨架，或根据站点类型从零搭建（工具站/目录站）。复用工程配置（next.config、eslint、postcss）和基础设施组件（GA、AdSense、Cookie Consent、JSON-LD）</div>
+      <div class="stage-output">→ 可运行的 Next.js 项目</div>
+    </div>
+    <div class="stage" data-num="03">
+      <div class="stage-title">页面 — 按架构开发全部页面</div>
+      <div class="stage-desc">首页 / 博客列表 / 文章详情 / 关于 / 隐私政策 / 404，按 PLAN.md 的结构开发，移动端优先响应式设计</div>
+      <div class="stage-output">→ 6-7 个完整页面</div>
+    </div>
+    <div class="stage" data-num="04">
+      <div class="stage-title">内容 — 5 篇 SEO 种子文章</div>
+      <div class="stage-desc">支柱文章 + 对比文章 + 教程指南 + 评测 + 清单，每篇 1500-2500 词，内部互链形成主题簇，去 AI 味润色</div>
+      <div class="stage-output">→ 5 篇 MDX 文件 (~10,000 词)</div>
+    </div>
+    <div class="stage" data-num="05">
+      <div class="stage-title">Review — CHECKLIST 逐项自检</div>
+      <div class="stage-desc">按 CHECKLIST.md 40+ 项标准检查：构建/SEO/性能/代码质量/响应式/内容/安全/合规，发现问题立即修复</div>
+      <div class="stage-output">→ 全部检查通过</div>
+    </div>
+    <div class="stage" data-num="06">
+      <div class="stage-title">部署 — 一键上线 Vercel</div>
+      <div class="stage-desc">执行 <code>deploy.sh --create</code>：通过 Vercel API 创建项目 → 链接 Monorepo → 配置环境变量 → 触发生产部署</div>
+      <div class="stage-output">→ 线上站点 https://xxx.vercel.app</div>
+    </div>
+    <div class="stage" data-num="07">
+      <div class="stage-title">域名校验 — 修正 URL 不一致</div>
+      <div class="stage-desc">查询 Vercel 实际分配的域名，与代码中硬编码的域名比对，不一致则全局替换（sitemap、canonical、JSON-LD、robots.txt）后重新部署</div>
+      <div class="stage-output">→ 所有 URL 一致</div>
+    </div>
+    <div class="stage" data-num="08">
+      <div class="stage-title">验证 — 健康检查 & 搜索引擎 Ping</div>
+      <div class="stage-desc">执行 <code>check-site.sh</code> 检查所有页面 HTTP 状态码、SEO 标签、文章可达性；执行 <code>ping-search-engines.sh</code> 通知 Google/Bing 抓取 sitemap</div>
+      <div class="stage-output">→ 交付报告</div>
+    </div>
+    <div class="stage" data-num="09">
+      <div class="stage-title">GSC 接入 — 搜索引擎验证</div>
+      <div class="stage-desc">写入 Google Search Console 验证 meta 标签，重新部署。注意：新站不配 GA4，Day 30 后只给赢家配</div>
+      <div class="stage-output">→ GSC 验证通过</div>
+    </div>
+    <div class="stage" data-num="10">
+      <div class="stage-title">交付 — 提醒用户提交 Sitemap</div>
+      <div class="stage-desc">输出 DELIVERY_TEMPLATE.md 格式的交付报告，提醒用户去 GSC 手动提交 sitemap（AI 无法代替操作）</div>
+      <div class="stage-output">→ 完成交付</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ S5 ═══════════════════ -->
+<section id="s5">
+  <h2><span class="num">05</span> 自动化脚本体系</h2>
+
+  <p>每个脚本都是幂等的、可独立执行的，AI Agent 在流水线中按需调用：</p>
+
+  <table>
+    <tr><th>脚本</th><th>用途</th><th>关键实现</th></tr>
+    <tr>
+      <td><code>new-site.sh &lt;slug&gt; &lt;brand&gt; &lt;desc&gt;</code></td>
+      <td>博客型站点脚手架</td>
+      <td>复制 <code>templates/starter/</code> → 全局替换占位符 (<code>__SLUG__</code>, <code>__BRAND__</code>) → <code>npm install</code> → 生成 PLAN.md 骨架</td>
+    </tr>
+    <tr>
+      <td><code>deploy.sh &lt;站名&gt; --create</code></td>
+      <td>首次部署</td>
+      <td>Vercel API 创建项目（设置 <code>rootDirectory</code> + <code>gitRepository</code>）→ 配置环境变量（<code>SITE_URL</code>, <code>GA_ID</code>, <code>ADSENSE_ID</code>）→ 触发部署 → Ping 搜索引擎 → 健康检查</td>
+    </tr>
+    <tr>
+      <td><code>deploy.sh &lt;站名&gt;</code></td>
+      <td>更新部署</td>
+      <td><code>git add</code> + <code>git commit</code> + <code>git push</code> → Vercel 通过 Ignored Build Step 只构建有变更的站点</td>
+    </tr>
+    <tr>
+      <td><code>check-site.sh &lt;站名&gt;</code></td>
+      <td>健康检查</td>
+      <td>curl 检测所有页面状态码 + SEO 标签（title/description/OG/JSON-LD）+ 遍历 MDX 目录验证文章可达性</td>
+    </tr>
+    <tr>
+      <td><code>ping-search-engines.sh &lt;站名&gt;</code></td>
+      <td>搜索引擎通知</td>
+      <td>HTTP 请求 Google Ping API + Bing Ping API，附带 sitemap URL</td>
+    </tr>
+  </table>
+
+  <div class="code-block">
+<span class="comment"># 典型的建站部署全流程（AI Agent 自动执行）</span>
+
+<span class="comment"># 1. 脚手架生成</span>
+<span class="cmd">./scripts/new-site.sh</span> <span class="str">aitoolpilot</span> <span class="str">"AIToolPilot"</span> <span class="str">"Your guide to the best AI tools"</span>
+
+<span class="comment"># 2. （AI Agent 在此期间自动完成页面开发 + 内容创作 + Self-Review）</span>
+
+<span class="comment"># 3. 一键部署到 Vercel</span>
+<span class="cmd">./scripts/deploy.sh</span> <span class="str">aitoolpilot</span> <span class="flag">--create</span>
+
+<span class="comment"># 4. 健康检查（deploy.sh 末尾自动调用）</span>
+<span class="cmd">./scripts/check-site.sh</span> <span class="str">aitoolpilot</span>
+
+<span class="comment"># 5. 搜索引擎 ping（deploy.sh 末尾自动调用）</span>
+<span class="cmd">./scripts/ping-search-engines.sh</span> <span class="str">aitoolpilot</span>
+  </div>
+</section>
+
+<!-- ═══════════════════ S6 ═══════════════════ -->
+<section id="s6">
+  <h2><span class="num">06</span> Monorepo 部署架构</h2>
+
+  <h3>为什么选 Monorepo？</h3>
+  <p>站群场景下，如果每站一个仓库，管理成本会随站点数量线性增长。Monorepo 方案：一个仓库管 7 个站，共享脚本和模板，推一次 git 就触发所有变更站点的自动部署。</p>
+
+  <div class="code-block">
+site-forge/                      <span class="comment"># Monorepo 根</span>
+├── AGENTS.md                    <span class="comment"># AI 全局上下文</span>
+├── .cursor/skills/build-site/   <span class="comment"># 建站 Skill 协议</span>
+├── strategy/                    <span class="comment"># 运营策略文档</span>
+├── templates/starter/           <span class="comment"># 参考模板</span>
+├── scripts/                     <span class="comment"># 自动化脚本</span>
+│   ├── new-site.sh
+│   ├── deploy.sh
+│   ├── check-site.sh
+│   └── ping-search-engines.sh
+└── sites/                       <span class="comment"># 所有站点</span>
+    ├── aitoolpilot/             <span class="comment"># AI 工具评测站</span>
+    ├── calcwise/                <span class="comment"># 在线计算器工具站</span>
+    ├── coursecompass/            <span class="comment"># 在线课程导航</span>
+    ├── desksetuphq/             <span class="comment"># 桌面设置指南</span>
+    ├── emailtoolscout/          <span class="comment"># 邮件工具评测</span>
+    ├── nocoderadar/             <span class="comment"># 无代码工具雷达</span>
+    └── smartnestguide/          <span class="comment"># 智能家居指南</span>
+  </div>
+
+  <h3>Vercel 多项目映射</h3>
+  <p>每个站点在 Vercel 上是独立项目，通过 <code>rootDirectory</code> 指向 <code>sites/&lt;站名&gt;/</code>。关键配置：</p>
+
+  <table>
+    <tr><th>配置项</th><th>值</th><th>作用</th></tr>
+    <tr>
+      <td><code>rootDirectory</code></td>
+      <td><code>sites/aitoolpilot</code></td>
+      <td>告诉 Vercel 构建入口在哪</td>
+    </tr>
+    <tr>
+      <td><code>gitRepository</code></td>
+      <td><code>github-org/site-forge</code></td>
+      <td>链接到 Monorepo 而不是独立仓库</td>
+    </tr>
+    <tr>
+      <td><code>commandForIgnoringBuildStep</code></td>
+      <td><code>git diff --quiet HEAD~1 HEAD -- .</code></td>
+      <td>只有该站点目录有变更时才触发构建，避免无关 push 浪费构建配额</td>
+    </tr>
+  </table>
+
+  <div class="highlight-box">
+    <strong>效果：</strong>修改 <code>sites/aitoolpilot/</code> 下的文件 → <code>git push</code> → Vercel 只构建 aitoolpilot，其他 6 个站不受影响。部署完全由 git push 触发，无需手动操作 Vercel 后台。
+  </div>
+</section>
+
+<!-- ═══════════════════ S7 ═══════════════════ -->
+<section id="s7">
+  <h2><span class="num">07</span> 质量保障与自动验证</h2>
+
+  <p>质量门禁分三层：静态检查 → 部署后健康检查 → 交互测试。</p>
+
+  <h3>第一层：CHECKLIST 静态检查（40+ 项）</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="label">构建</div>
+      <div class="value">Build + Lint + TypeScript</div>
+      <div class="note">npm run build/lint 零错误零警告</div>
+    </div>
+    <div class="card">
+      <div class="label">SEO</div>
+      <div class="value">10 项检查</div>
+      <div class="note">title/description/h1/alt/sitemap/robots/JSON-LD/canonical/OG/互链</div>
+    </div>
+    <div class="card">
+      <div class="label">性能</div>
+      <div class="value">Lighthouse &gt; 90</div>
+      <div class="note">next/image + next/font + Tailwind purge + SSG</div>
+    </div>
+    <div class="card">
+      <div class="label">合规</div>
+      <div class="value">Privacy + Cookie + Disclosure</div>
+      <div class="note">GDPR Cookie 弹窗 + 隐私政策 + 联盟声明</div>
+    </div>
+  </div>
+
+  <h3>第二层：check-site.sh 健康检查</h3>
+  <p>自动 curl 所有页面，验证 HTTP 200 + SEO 标签存在性 + 文章可达性，输出 pass/fail/warn 汇总。</p>
+
+  <h3>第三层：Playwright MCP 交互测试</h3>
+  <p>通过 Playwright MCP 工具在真实浏览器中验证：Cookie 弹窗点击 → 导航跳转 → 移动端汉堡菜单 → 客户端组件水合。这层解决了"SSR 看起来正常但事件处理器未绑定"的隐性 bug。</p>
+</section>
+
+<!-- ═══════════════════ S8 ═══════════════════ -->
+<section id="s8">
+  <h2><span class="num">08</span> 数据驱动的 30 天评估</h2>
+
+  <h3>核心指标：GSC 展示量（而非点击量）</h3>
+  <p>新站 30 天内很难有大量点击，但"展示量"说明 Google 已经认为你和某些搜索词相关。展示量是流量的先行指标。</p>
+
+  <table>
+    <tr><th>Day 30 展示量</th><th>判定</th><th>行动</th></tr>
+    <tr>
+      <td><span class="tag tag-green">&gt; 500</span></td>
+      <td>赢家候选</td>
+      <td>进入加码期 → 规划 10-20 篇文章 + 申请 AdSense + 注册联盟</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-yellow">100-500</span></td>
+      <td>观望</td>
+      <td>再等 30 天，不追加内容，Day 60 提高标准到 &gt; 1000</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-red">&lt; 100</span></td>
+      <td>大概率淘汰</td>
+      <td>停止投入，保留站点 90 天观察</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-red">0</span></td>
+      <td>直接砍</td>
+      <td>Niche 不行，不用犹豫</td>
+    </tr>
+  </table>
+
+  <div class="warn-box">
+    <strong>30 天内不追加内容。</strong>这不是偷懒，而是科学对照：5 篇种子文章就是实验组。如果全部无展示量，说明 niche 本身有问题，不是内容不够的问题。追加内容会干扰判断。
+  </div>
+
+  <h3>新站 GA4 策略</h3>
+  <p>Day 0 只配 GSC 验证，<strong>不配 GA4</strong>。原因：新站前 30 天几乎没有流量，GA4 的数据没有决策价值，反而增加部署复杂度。Day 30 筛出赢家后再配 GA4，把精力花在刀刃上。</p>
+</section>
+
+<!-- ═══════════════════ S9 ═══════════════════ -->
+<section id="s9">
+  <h2><span class="num">09</span> 踩过的坑 & 工程决策</h2>
+
+  <div class="interview-qa">
+    <div class="q">坑 1：Vercel 域名不可预测</div>
+    <div class="a">
+      Vercel 分配的域名可能不是 <code>&lt;站名&gt;.vercel.app</code>（被占用时会变成 <code>&lt;站名&gt;-xxx.vercel.app</code>）。如果代码里硬编码的域名和实际域名不一致，sitemap、canonical URL、JSON-LD 全部失效，GSC 无法正确抓取。
+      <br><br>
+      <strong>解决方案：</strong>部署后通过 Vercel API 查询实际域名，自动比对并全局替换，然后重新构建部署。这就是流水线第 7 阶段"域名校验"存在的原因。
+    </div>
+
+    <div class="q">坑 2：SSR 水合失败导致事件处理器不绑定</div>
+    <div class="a">
+      SSR 组件用 <code>useState(() => localStorage.getItem(...))</code> 初始化状态时，服务端渲染的 HTML 和客户端水合后的 DOM 不一致，React 跳过水合，所有 <code>onClick</code> 等事件处理器失效。页面看起来正常但完全不可交互。
+      <br><br>
+      <strong>解决方案：</strong>用 <code>useSyncExternalStore</code> 替代直接调用浏览器 API，确保 SSR 阶段返回安全的默认值。同时引入 Playwright MCP 做交互测试，在真实浏览器中验证事件绑定。
+    </div>
+
+    <div class="q">坑 3：为什么不用 output: "export"？</div>
+    <div class="a">
+      Next.js 的 <code>output: "export"</code> 会生成纯静态 HTML，失去 Vercel 对 Next.js 的原生 SSG/ISR 支持，导致路由重写、middleware、动态路由等功能不可用。Vercel 本身就能完美处理 Next.js SSG，没必要退化到纯静态导出。
+    </div>
+
+    <div class="q">决策：为什么选 Monorepo 而不是 Multi-Repo？</div>
+    <div class="a">
+      <strong>Multi-Repo 的问题：</strong>每站一个仓库，7 个站 = 7 个仓库 × (CI 配置 + 脚本维护 + 模板同步) = 管理地狱。脚本更新需要手动同步到所有仓库。
+      <br><br>
+      <strong>Monorepo 的优势：</strong>脚本、模板、策略文档只维护一份。Vercel 的 <code>commandForIgnoringBuildStep</code> 解决了"推一次构建所有"的问题，实现了按需构建。唯一的代价是仓库体积增大，但对于内容站来说完全可以接受。
+    </div>
+
+    <div class="q">决策：为什么模板不是必须照搬？</div>
+    <div class="a">
+      <code>templates/starter/</code> 是博客型参考模板，但站群覆盖多种形态（博客/工具站/目录站/对比站）。强制套模板会让工具站套上博客 UI，不合理。所以设计为"可复用的部分"（工程配置 + 基础设施组件）和"按需定制的部分"（页面结构 + UI），AI 根据领域灵活决定。
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ S10 ═══════════════════ -->
+<section id="s10">
+  <h2><span class="num">10</span> 面试预设问答</h2>
+
+  <div class="interview-qa">
+    <div class="q">Q: 能简单介绍一下这个项目吗？</div>
+    <div class="a">
+      这是一个全自动建站部署流水线。核心思路是把建站流程编码为 AI Agent 的 Skill 协议，用户只需提供领域和方向等 5 项材料，AI 就能自主完成从脚手架生成、内容创作、SEO 配置、Vercel 部署到搜索引擎接入的全链路工作。目前已经用这套系统建了 7 个不同领域的站点，实现了"零人工干预"的站群批量生产。
+    </div>
+
+    <div class="q">Q: "零人工干预"具体是怎么做到的？</div>
+    <div class="a">
+      关键是把建站 SOP 编码为一份 Skill 文件。它定义了 10 个阶段的执行步骤、质量门禁（40+ 项 Checklist）、约束条件（比如不允许 Lorem Ipsum、不允许硬编码密钥、不允许超过 15 个依赖）以及异常处理（比如域名不一致时的自动修正逻辑）。AI Agent 加载这份协议后，像执行 SOP 一样逐步完成。我只需要在最后去 Google Search Console 手动提交 sitemap，这是 AI 无法代替的操作。
+    </div>
+
+    <div class="q">Q: 技术栈是怎么选的？</div>
+    <div class="a">
+      Next.js SSG + Tailwind + MDX + Vercel。选型逻辑是：<strong>SEO 优先</strong>（SSG 静态生成、JSON-LD 结构化数据、自动 sitemap）+ <strong>速度优先</strong>（Tailwind 开发快、MDX 内容管理轻量、Vercel 部署零配置）+ <strong>成本优先</strong>（Vercel Hobby 免费、不引入 CMS 和数据库）。整个站点是纯静态的，没有后端，Lighthouse Performance 保持 90+。
+    </div>
+
+    <div class="q">Q: Monorepo 方案怎么处理多站点的构建效率？</div>
+    <div class="a">
+      靠 Vercel 的 Ignored Build Step 机制。每个站点的 Vercel 项目配置了 <code>git diff --quiet HEAD~1 HEAD -- .</code>，意思是"如果这次 push 没有改动我这个子目录下的文件，就跳过构建"。所以推一次代码，只有真正有变更的站点会触发构建，其他站不受影响。7 个站共享一个仓库，但构建互不干扰。
+    </div>
+
+    <div class="q">Q: 如何保证每个站的质量一致？</div>
+    <div class="a">
+      三层质量门禁：第一层是 CHECKLIST.md 里 40+ 项静态检查（构建/SEO/性能/安全/合规），AI 逐项执行并修复；第二层是 check-site.sh 部署后自动 curl 所有页面做健康检查；第三层是 Playwright MCP 在真实浏览器里做交互测试，验证 Cookie 弹窗、导航、移动端菜单等交互功能。这三层是确定性的检查，不受 AI 模型随机性影响。
+    </div>
+
+    <div class="q">Q: 遇到过什么比较棘手的问题？</div>
+    <div class="a">
+      最典型的是 SSR 水合失败。Cookie 弹窗组件用了 <code>useState(() => localStorage.getItem(...))</code> 来读取用户之前的选择，但服务端渲染时 <code>localStorage</code> 不存在，导致服务端和客户端渲染结果不一致，React 跳过水合，所有按钮的点击事件都失效了。页面看起来完全正常，但一个按钮都点不了。排查了很久才定位到水合问题，最终用 <code>useSyncExternalStore</code> 解决。这个经历也促使我在流水线中加入了 Playwright 交互测试环节。
+    </div>
+
+    <div class="q">Q: 如何衡量一个站点是否成功？</div>
+    <div class="a">
+      用 Google Search Console 的展示量作为 Day 30 的判定指标。新站 30 天内几乎没有点击量，但展示量能说明 Google 是否已经把你和某些搜索词关联。&gt; 500 展示量是赢家候选，&lt; 100 大概率淘汰，0 直接砍。评估期内不追加任何内容，5 篇种子文章就是对照实验——如果 niche 本身没潜力，加再多内容也没用。
+    </div>
+
+    <div class="q">Q: 这个项目最大的收获是什么？</div>
+    <div class="a">
+      两个层面。技术层面：深入理解了 Next.js SSG/SSR 的水合机制、Vercel 的 Monorepo 部署模式、SEO 结构化数据的最佳实践，以及如何用 AI Agent 的 Skill 机制把复杂流程变成可复用、可版本控制的自动化协议。业务层面：学到了"数据驱动 + 快速迭代"的产品思维——不预判市场，而是用低成本试错 + 数据筛选来找到真正有需求的领域。
+    </div>
+
+    <div class="q">Q: 你觉得 AI Agent 做建站和人工建站最大的区别是什么？</div>
+    <div class="a">
+      不是"更快"，而是<strong>确定性</strong>。人工建站每次质量参差不齐，取决于状态、经验、细心程度。Skill 协议把质量标准固化为 40+ 项可检查的规则，每次执行都是同样的标准。AI 的价值不是替代程序员，而是把"已知的最佳实践"变成零成本可重复执行的流程。真正需要人来做的是策略判断——选什么领域、什么时候加码什么时候止损。
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ 数据一览 ═══════════════════ -->
+<section>
+  <h2><span class="num">+</span> 项目数据一览</h2>
+  <div class="metrics-bar">
+    <div class="metric">
+      <div class="num">7</div>
+      <div class="unit">已建站点</div>
+    </div>
+    <div class="metric">
+      <div class="num">10</div>
+      <div class="unit">流水线阶段</div>
+    </div>
+    <div class="metric">
+      <div class="num">40+</div>
+      <div class="unit">质量检查项</div>
+    </div>
+    <div class="metric">
+      <div class="num">5</div>
+      <div class="unit">自动化脚本</div>
+    </div>
+    <div class="metric">
+      <div class="num">~2h</div>
+      <div class="unit">单站交付时间</div>
+    </div>
+  </div>
+
+  <h3>已建站点列表</h3>
+  <table>
+    <tr><th>站名</th><th>领域</th><th>类型</th></tr>
+    <tr><td>aitoolpilot</td><td>AI 工具评测</td><td><span class="tag tag-blue">博客/评测</span></td></tr>
+    <tr><td>calcwise</td><td>在线计算器</td><td><span class="tag tag-purple">工具站</span></td></tr>
+    <tr><td>coursecompass</td><td>在线课程导航</td><td><span class="tag tag-cyan">目录站</span></td></tr>
+    <tr><td>desksetuphq</td><td>桌面设置指南</td><td><span class="tag tag-blue">博客/评测</span></td></tr>
+    <tr><td>emailtoolscout</td><td>邮件工具评测</td><td><span class="tag tag-blue">博客/评测</span></td></tr>
+    <tr><td>nocoderadar</td><td>无代码工具雷达</td><td><span class="tag tag-blue">博客/评测</span></td></tr>
+    <tr><td>smartnestguide</td><td>智能家居指南</td><td><span class="tag tag-blue">博客/评测</span></td></tr>
+  </table>
+</section>
+
+<div class="footer">
+  Site Forge — 全自动建站部署流水线 &middot; 面试腹稿 &middot; 2026
+</div>
+
+</body>
+</html>
